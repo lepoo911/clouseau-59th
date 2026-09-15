@@ -24,16 +24,28 @@ export default function MusicPlayer({ lang = 'en' }) {
     setShowCard(true);
     setIsFading(false);
 
-    // Appear for 4 seconds (was 1s + 3s added)
+    // Visible for 1.5 seconds, then start fading
     fadeTimerRef.current = setTimeout(() => {
       setIsFading(true);
-    }, 4000);
+    }, 1500);
 
-    // Fade out over 2 seconds (4s hold + 2s fade = 6s total)
+    // Fully hidden after 2 seconds total (1.5s hold + 500ms fade)
     hideTimerRef.current = setTimeout(() => {
       setShowCard(false);
       setIsFading(false);
-    }, 6000);
+    }, 2000);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+
+    // Fade away smoothly on mouse-out
+    setIsFading(true);
+    hideTimerRef.current = setTimeout(() => {
+      setShowCard(false);
+      setIsFading(false);
+    }, 400);
   }, []);
 
   // Cleanup timers on unmount
@@ -71,6 +83,7 @@ export default function MusicPlayer({ lang = 'en' }) {
     <div
       className="fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-40 select-none pointer-events-auto transition-transform duration-300 ease-out hover:translate-y-[45%]"
       onMouseEnter={triggerShow}
+      onMouseLeave={handleMouseLeave}
     >
       {/* 1. Semi-Transparent 300% Enlarged Vinyl Disc Button */}
       <button
@@ -133,7 +146,7 @@ export default function MusicPlayer({ lang = 'en' }) {
           }`}
           style={{
             transition: isFading
-              ? 'opacity 2000ms cubic-bezier(0.4, 0, 0.2, 1), transform 2000ms cubic-bezier(0.4, 0, 0.2, 1)'
+              ? 'opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1)'
               : 'opacity 200ms ease-out, transform 200ms ease-out'
           }}
         >
