@@ -16,7 +16,8 @@ export function generateRichEmailHtml({
   selectedTime,
   punchline,
   letter = {},
-  lang = 'en'
+  lang = 'en',
+  isSimulation = false
 }) {
   const toName = letter.toName || 'Chief Inspector Jacques Clouseau';
   const fromName = letter.fromName || 'Claire & Erhard (EB) ⛳';
@@ -52,13 +53,18 @@ export function generateRichEmailHtml({
         <!-- Dispatch Letter Card -->
         <div style="background-color:#fdfcf7; border:3px solid #b45309; border-radius:18px; padding:24px 20px; box-shadow:0 10px 25px rgba(0,0,0,0.08);">
           
+          ${isSimulation ? `
+          <div style="background-color:#fef3c7; border:2px dashed #d97706; padding:8px 12px; margin-bottom:14px; text-align:center; font-family:sans-serif; font-size:12px; font-weight:bold; color:#92400e; border-radius:8px;">
+            🎮 SIMULATION TEST MODE — No emails sent to Claire or EB
+          </div>` : ''}
+
           <!-- Top Header: TO / FROM / CC / RE + 59c Stamp -->
           <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-bottom:1px solid #d97706; padding-bottom:14px; margin-bottom:16px;">
             <tr>
               <td valign="top" style="font-family:'Courier New', Courier, monospace; font-size:13px; line-height:1.6; color:#1c1917;">
                 <div><span style="color:#78350f; font-weight:bold;">TO :</span> <strong>${toName}</strong></div>
                 <div><span style="color:#78350f; font-weight:bold;">FROM :</span> <strong>${fromName}</strong></div>
-                <div><span style="color:#78350f; font-weight:bold;">CC :</span> <span style="color:#57534e; font-size:11px;">clairedec42@yahoo.com, erhardbuchholz@gmail.com</span></div>
+                <div><span style="color:#78350f; font-weight:bold;">CC :</span> <span style="color:#57534e; font-size:11px;">${isSimulation ? '(Disabled in simulation mode)' : 'clairedec42@yahoo.com, erhardbuchholz@gmail.com'}</span></div>
                 <div><span style="color:#78350f; font-weight:bold;">RE :</span> <span style="color:#047857; font-weight:bold;">${subject}</span></div>
               </td>
               <td valign="top" align="right" style="width:75px; padding-left:10px;">
@@ -160,17 +166,23 @@ export async function sendVerdictInBackground({
   selectedTime,
   punchline,
   letter = {},
-  lang = 'en'
+  lang = 'en',
+  isSimulation = false
 }) {
   const recipient = RECIPIENT_EMAIL;
-  const subject = `lePoo's 59 - Official Verdict: ${selectedLocation?.title || 'Venue'} at ${selectedTime || ''} ⛳`;
+  // In simulation mode, strictly ZERO emails to Claire or EB!
+  const ccRecipient = isSimulation ? '' : CC_EMAILS;
+  const subject = isSimulation
+    ? `[SIMULATION TEST] lePoo's 59 - Official Verdict: ${selectedLocation?.title || 'Venue'} at ${selectedTime || ''} ⛳`
+    : `lePoo's 59 - Official Verdict: ${selectedLocation?.title || 'Venue'} at ${selectedTime || ''} ⛳`;
 
   const htmlBody = generateRichEmailHtml({
     selectedLocation,
     selectedTime,
     punchline,
     letter,
-    lang
+    lang,
+    isSimulation
   });
 
   // 1. Primary: Transmit rich HTML email via Google Apps Script Webhook
@@ -184,12 +196,12 @@ export async function sendVerdictInBackground({
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           to: recipient,
-          cc: CC_EMAILS,
+          cc: ccRecipient,
           subject,
           htmlBody
         })
       });
-      return { success: true, method: 'google_script' };
+      return { success: true, method: 'google_script', isSimulation };
     } catch (e) {
       console.warn('Google Apps Script webhook transmission failed, trying FormSubmit fallback:', e);
     }

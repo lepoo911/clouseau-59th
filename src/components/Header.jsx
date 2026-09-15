@@ -116,6 +116,7 @@ export default function Header({
   erhardVote = {},
   claireVote = {},
   isUnanimous = false,
+  isSimulation = false,
 }) {
   const languages = [
     { code: 'fr', label: 'FR', title: 'Français' },
@@ -130,43 +131,77 @@ export default function Header({
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* Erhard Avatar (Blue) */}
         <div className="relative shrink-0 flex flex-col items-center">
-          <div
-            className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 transition-all cursor-default ${
-              currentUser === 'erhard'
-                ? 'border-blue-600 ring-3 ring-blue-500/60 shadow-md shadow-blue-500/25 scale-105'
-                : 'border-stone-300 opacity-75'
-            }`}
-            title={
-              currentUser === 'erhard'
-                ? (lang === 'de' ? 'Erhard (Sie)' : lang === 'fr' ? 'Erhard (Vous)' : 'Erhard (You)')
-                : (lang === 'de' ? 'Erhard (Partner)' : lang === 'fr' ? 'Erhard (Partenaire)' : 'Erhard (Partner)')
-            }
-            aria-label="Erhard"
-          >
-            <img
-              src={`${import.meta.env.BASE_URL}assets/erhard_avatar.png`}
-              alt="Erhard"
-              className="w-full h-full object-cover"
-            />
-            {/* Active "YOU" badge */}
-            {currentUser === 'erhard' && (
-              <span className="absolute top-0 left-0 bg-blue-600 text-white font-black text-[9px] px-1 py-0.2 rounded-br-md leading-none shadow-xs font-typewriter">
-                YOU
-              </span>
-            )}
-            {/* Vote readiness checkmark badge */}
-            <span
-              className={`absolute bottom-0 right-0 text-[10px] w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-tl-lg flex items-center justify-center font-bold shadow-xs ${
-                erhardVote?.locationId && erhardVote?.time
-                  ? 'bg-blue-600 text-white'
-                  : erhardVote?.locationId
-                  ? 'bg-blue-400 text-white'
-                  : 'bg-stone-300 text-stone-600'
+          {isSimulation ? (
+            <button
+              type="button"
+              onClick={() => onSelectUser && onSelectUser('erhard')}
+              className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-110 active:scale-95 ${
+                currentUser === 'erhard'
+                  ? 'border-blue-600 ring-4 ring-blue-400 shadow-md shadow-blue-500/25 scale-105'
+                  : 'border-stone-300 opacity-60 hover:opacity-100'
               }`}
+              title="Click to switch to Erhard (Simulation Mode)"
+              aria-label="Switch to Erhard"
             >
-              {erhardVote?.locationId && erhardVote?.time ? '✓' : erhardVote?.locationId ? '½' : '•'}
-            </span>
-          </div>
+              <img
+                src={`${import.meta.env.BASE_URL}assets/erhard_avatar.png`}
+                alt="Erhard"
+                className="w-full h-full object-cover"
+              />
+              {currentUser === 'erhard' && (
+                <span className="absolute top-0 left-0 bg-blue-600 text-white font-black text-[9px] px-1 py-0.2 rounded-br-md leading-none shadow-xs font-typewriter">
+                  YOU
+                </span>
+              )}
+              <span
+                className={`absolute bottom-0 right-0 text-[10px] w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-tl-lg flex items-center justify-center font-bold shadow-xs ${
+                  erhardVote?.locationId && erhardVote?.time
+                    ? 'bg-blue-600 text-white'
+                    : erhardVote?.locationId
+                    ? 'bg-blue-400 text-white'
+                    : 'bg-stone-300 text-stone-600'
+                }`}
+              >
+                {erhardVote?.locationId && erhardVote?.time ? '✓' : erhardVote?.locationId ? '½' : '•'}
+              </span>
+            </button>
+          ) : (
+            <div
+              className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 transition-all cursor-default ${
+                currentUser === 'erhard'
+                  ? 'border-blue-600 ring-3 ring-blue-500/60 shadow-md shadow-blue-500/25 scale-105'
+                  : 'border-stone-300 opacity-75'
+              }`}
+              title={
+                currentUser === 'erhard'
+                  ? (lang === 'de' ? 'Erhard (Sie)' : lang === 'fr' ? 'Erhard (Vous)' : 'Erhard (You)')
+                  : (lang === 'de' ? 'Erhard (Partner)' : lang === 'fr' ? 'Erhard (Partenaire)' : 'Erhard (Partner)')
+              }
+              aria-label="Erhard"
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}assets/erhard_avatar.png`}
+                alt="Erhard"
+                className="w-full h-full object-cover"
+              />
+              {currentUser === 'erhard' && (
+                <span className="absolute top-0 left-0 bg-blue-600 text-white font-black text-[9px] px-1 py-0.2 rounded-br-md leading-none shadow-xs font-typewriter">
+                  YOU
+                </span>
+              )}
+              <span
+                className={`absolute bottom-0 right-0 text-[10px] w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-tl-lg flex items-center justify-center font-bold shadow-xs ${
+                  erhardVote?.locationId && erhardVote?.time
+                    ? 'bg-blue-600 text-white'
+                    : erhardVote?.locationId
+                    ? 'bg-blue-400 text-white'
+                    : 'bg-stone-300 text-stone-600'
+                }`}
+              >
+                {erhardVote?.locationId && erhardVote?.time ? '✓' : erhardVote?.locationId ? '½' : '•'}
+              </span>
+            </div>
+          )}
           <span className="text-[10px] font-black font-typewriter text-blue-800 mt-0.5 tracking-tight">
             Erhard
           </span>
@@ -174,43 +209,77 @@ export default function Header({
 
         {/* Claire Avatar (Rose) */}
         <div className="relative shrink-0 flex flex-col items-center">
-          <div
-            className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 transition-all cursor-default ${
-              currentUser === 'claire'
-                ? 'border-rose-600 ring-3 ring-rose-500/60 shadow-md shadow-rose-500/25 scale-105'
-                : 'border-stone-300 opacity-75'
-            }`}
-            title={
-              currentUser === 'claire'
-                ? (lang === 'de' ? 'Claire (Sie)' : lang === 'fr' ? 'Claire (Vous)' : 'Claire (You)')
-                : (lang === 'de' ? 'Claire (Partnerin)' : lang === 'fr' ? 'Claire (Partenaire)' : 'Claire (Partner)')
-            }
-            aria-label="Claire"
-          >
-            <img
-              src={`${import.meta.env.BASE_URL}assets/claire_avatar.png`}
-              alt="Claire"
-              className="w-full h-full object-cover"
-            />
-            {/* Active "YOU" badge */}
-            {currentUser === 'claire' && (
-              <span className="absolute top-0 left-0 bg-rose-600 text-white font-black text-[9px] px-1 py-0.2 rounded-br-md leading-none shadow-xs font-typewriter">
-                YOU
-              </span>
-            )}
-            {/* Vote readiness checkmark badge */}
-            <span
-              className={`absolute bottom-0 right-0 text-[10px] w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-tl-lg flex items-center justify-center font-bold shadow-xs ${
-                claireVote?.locationId && claireVote?.time
-                  ? 'bg-rose-600 text-white'
-                  : claireVote?.locationId
-                  ? 'bg-rose-400 text-white'
-                  : 'bg-stone-300 text-stone-600'
+          {isSimulation ? (
+            <button
+              type="button"
+              onClick={() => onSelectUser && onSelectUser('claire')}
+              className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-110 active:scale-95 ${
+                currentUser === 'claire'
+                  ? 'border-rose-600 ring-4 ring-rose-400 shadow-md shadow-rose-500/25 scale-105'
+                  : 'border-stone-300 opacity-60 hover:opacity-100'
               }`}
+              title="Click to switch to Claire (Simulation Mode)"
+              aria-label="Switch to Claire"
             >
-              {claireVote?.locationId && claireVote?.time ? '✓' : claireVote?.locationId ? '½' : '•'}
-            </span>
-          </div>
+              <img
+                src={`${import.meta.env.BASE_URL}assets/claire_avatar.png`}
+                alt="Claire"
+                className="w-full h-full object-cover"
+              />
+              {currentUser === 'claire' && (
+                <span className="absolute top-0 left-0 bg-rose-600 text-white font-black text-[9px] px-1 py-0.2 rounded-br-md leading-none shadow-xs font-typewriter">
+                  YOU
+                </span>
+              )}
+              <span
+                className={`absolute bottom-0 right-0 text-[10px] w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-tl-lg flex items-center justify-center font-bold shadow-xs ${
+                  claireVote?.locationId && claireVote?.time
+                    ? 'bg-rose-600 text-white'
+                    : claireVote?.locationId
+                    ? 'bg-rose-400 text-white'
+                    : 'bg-stone-300 text-stone-600'
+                }`}
+              >
+                {claireVote?.locationId && claireVote?.time ? '✓' : claireVote?.locationId ? '½' : '•'}
+              </span>
+            </button>
+          ) : (
+            <div
+              className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 transition-all cursor-default ${
+                currentUser === 'claire'
+                  ? 'border-rose-600 ring-3 ring-rose-500/60 shadow-md shadow-rose-500/25 scale-105'
+                  : 'border-stone-300 opacity-75'
+              }`}
+              title={
+                currentUser === 'claire'
+                  ? (lang === 'de' ? 'Claire (Sie)' : lang === 'fr' ? 'Claire (Vous)' : 'Claire (You)')
+                  : (lang === 'de' ? 'Claire (Partnerin)' : lang === 'fr' ? 'Claire (Partenaire)' : 'Claire (Partner)')
+              }
+              aria-label="Claire"
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}assets/claire_avatar.png`}
+                alt="Claire"
+                className="w-full h-full object-cover"
+              />
+              {currentUser === 'claire' && (
+                <span className="absolute top-0 left-0 bg-rose-600 text-white font-black text-[9px] px-1 py-0.2 rounded-br-md leading-none shadow-xs font-typewriter">
+                  YOU
+                </span>
+              )}
+              <span
+                className={`absolute bottom-0 right-0 text-[10px] w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-tl-lg flex items-center justify-center font-bold shadow-xs ${
+                  claireVote?.locationId && claireVote?.time
+                    ? 'bg-rose-600 text-white'
+                    : claireVote?.locationId
+                    ? 'bg-rose-400 text-white'
+                    : 'bg-stone-300 text-stone-600'
+                }`}
+              >
+                {claireVote?.locationId && claireVote?.time ? '✓' : claireVote?.locationId ? '½' : '•'}
+              </span>
+            </div>
+          )}
           <span className="text-[10px] font-black font-typewriter text-rose-800 mt-0.5 tracking-tight">
             Claire
           </span>
@@ -230,9 +299,15 @@ export default function Header({
           <span className="text-lg sm:text-2xl animate-pulse" aria-hidden="true">🎂</span>
         </div>
         <p className="text-sm sm:text-base md:text-lg font-black text-emerald-800 font-serif-vintage tracking-wider truncate mt-0.5">
-          {isUnanimous
-            ? (lang === 'de' ? '🤝 Einstimmiges Scorecard-Urteil !' : lang === 'fr' ? '🤝 Accord unanime des golfeurs !' : '🤝 Unanimous Golfers\' Verdict!')
-            : (t?.header?.forClaireErhard || "EB & Claire")}
+          {isSimulation ? (
+            <span className="inline-flex items-center gap-1 text-xs sm:text-sm bg-purple-100 text-purple-900 border border-purple-300 px-2.5 py-0.5 rounded-full font-bold font-typewriter">
+              🎮 Simulation Mode • Click avatars to switch user
+            </span>
+          ) : isUnanimous ? (
+            (lang === 'de' ? '🤝 Einstimmiges Scorecard-Urteil !' : lang === 'fr' ? '🤝 Accord unanime des golfeurs !' : '🤝 Unanimous Golfers\' Verdict!')
+          ) : (
+            (t?.header?.forClaireErhard || "EB & Claire")
+          )}
         </p>
       </div>
 

@@ -127,7 +127,7 @@ export const TRANSLATIONS = {
         copyBtn: "Copy letter",
         copiedBtn: "Letter copied!",
         confettiBtn: "Fire Confetti! 🎉",
-        changeBtn: "Modify selection"
+        changeBtn: "I change my mind!"
       },
       smsMessage: (title, _address, time) =>
         `Dear Jacques! Official 19th-hole verdict for your 59th birthday: We have locked in ${title} at ${time}! Ready our table at the clubhouse, no mulligans allowed! - EB & Claire ⛳`
@@ -264,7 +264,7 @@ export const TRANSLATIONS = {
         copyBtn: "Copier la lettre",
         copiedBtn: "Lettre copiée !",
         confettiBtn: "Tirer des confettis ! 🎉",
-        changeBtn: "Modifier mon choix"
+        changeBtn: "Je change d'avis !"
       },
       smsMessage: (title, address, time) =>
         `Cher Jacques! Verdict officiel du 19e trou pour ton 59e anniversaire: Nous avons choisi ${title} (${address}) à ${time}! Réserve notre table au club-house, aucun mulligan accordé! - EB & Claire ⛳`
@@ -396,7 +396,7 @@ export const TRANSLATIONS = {
         copyBtn: "Brieftext kopieren",
         copiedBtn: "Brieftext kopiert!",
         confettiBtn: "Nochmal Konfetti! 🎉",
-        changeBtn: "Auswahl anpassen"
+        changeBtn: "Ich ändere meine Meinung!"
       },
       smsMessage: (title, _address, time) =>
         `Lieber Jacques! Offizielles Urteil vom 19. Loch zu deinem 59. Geburtstag: Wir haben gewählt: ${title} um ${time}! Halte unseren Tisch am Clubhaus bereit, keine Mulligans! - EB & Claire ⛳`

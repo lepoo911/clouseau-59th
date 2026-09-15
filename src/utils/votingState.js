@@ -44,22 +44,34 @@ class VotingManager {
     };
     this.currentUser = 'erhard';
     this.channel = null;
+    this.isSimulation = false;
+    this.storageKey = STORAGE_KEY;
+    this.userStorageKey = USER_STORAGE_KEY;
+    this.channelName = 'birthday_voting_channel';
 
     if (typeof window !== 'undefined') {
-      // 1. Determine current user from URL or storage
       const urlParams = parseUrlParams();
+      this.isSimulation = Boolean(urlParams.isSimulation);
+
+      if (this.isSimulation) {
+        this.storageKey = 'birthday_voting_sandbox';
+        this.userStorageKey = 'birthday_voting_sandbox_user';
+        this.channelName = 'birthday_voting_sandbox_channel';
+      }
+
+      // 1. Determine current user from URL or storage
       if (urlParams.user && (urlParams.user === 'erhard' || urlParams.user === 'claire')) {
         this.currentUser = urlParams.user;
       } else {
-        const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+        const storedUser = localStorage.getItem(this.userStorageKey);
         if (storedUser === 'erhard' || storedUser === 'claire') {
           this.currentUser = storedUser;
         }
       }
 
-      // 2. Load stored votes from localStorage if available
+      // 2. Load stored votes from isolated localStorage if available
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(this.storageKey);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed?.erhard && parsed?.claire) {
@@ -87,7 +99,7 @@ class VotingManager {
       // 4. Setup BroadcastChannel for sub-millisecond tab-to-tab sync
       try {
         if ('BroadcastChannel' in window) {
-          this.channel = new BroadcastChannel('birthday_voting_channel');
+          this.channel = new BroadcastChannel(this.channelName);
           this.channel.onmessage = (event) => {
             if (event.data?.type === 'VOTES_UPDATED' && event.data?.votes) {
               this.votes = event.data.votes;
@@ -101,7 +113,7 @@ class VotingManager {
 
       // 5. Fallback cross-tab sync via storage events
       window.addEventListener('storage', (e) => {
-        if (e.key === STORAGE_KEY && e.newValue) {
+        if (e.key === this.storageKey && e.newValue) {
           try {
             const incoming = JSON.parse(e.newValue);
             if (incoming?.erhard && incoming?.claire) {
@@ -119,11 +131,14 @@ class VotingManager {
   saveAndBroadcast() {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.votes));
-      localStorage.setItem(USER_STORAGE_KEY, this.currentUser);
+      localStorage.setItem(this.storageKey, JSON.stringify(this.votes));
+      localStorage.setItem(this.userStorageKey, this.currentUser);
 
       // Keep URL updated with state so if link is copied/shared it reflects current selections
       const params = new URLSearchParams(window.location.search);
+      if (this.isSimulation) {
+        params.set('mode', 'simulation');
+      }
       params.set('user', this.currentUser);
       if (this.votes.erhard.locationId) params.set('e_spot', this.votes.erhard.locationId);
       else params.delete('e_spot');
@@ -189,7 +204,8 @@ class VotingManager {
       agreedLocationId: isLocUnanimous ? this.votes.erhard.locationId : null,
       agreedTime: isTimeUnanimous ? this.votes.erhard.time : null,
       erhardVote: this.votes.erhard,
-      claireVote: this.votes.claire
+      claireVote: this.votes.claire,
+      isSimulation: this.isSimulation
     };
   }
 
@@ -198,7 +214,7 @@ class VotingManager {
     this.currentUser = user;
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(USER_STORAGE_KEY, user);
+        localStorage.setItem(this.userStorageKey, user);
         syncUrlParams({ user });
       } catch {
         // Ignore

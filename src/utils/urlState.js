@@ -13,6 +13,8 @@ export function parseUrlParams() {
   const time = params.get('time');
   const lang = params.get('lang');
   const user = params.get('user');
+  const mode = params.get('mode');
+  const isSimulation = mode === 'simulation' || mode === 'test' || mode === 'sandbox' || params.get('test') === 'true' || params.get('sandbox') === 'true';
   const e_spot = params.get('e_spot') || params.get('eb_spot');
   const e_time = params.get('e_time') || params.get('eb_time');
   const c_spot = params.get('c_spot') || params.get('claire_spot');
@@ -23,6 +25,7 @@ export function parseUrlParams() {
     time: time || null,
     lang: ['fr', 'en', 'de'].includes(lang) ? lang : null,
     user: user === 'erhard' || user === 'claire' ? user : null,
+    isSimulation: Boolean(isSimulation),
     e_spot: e_spot || null,
     e_time: e_time || null,
     c_spot: c_spot || null,

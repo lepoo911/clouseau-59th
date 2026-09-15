@@ -14,11 +14,13 @@ export default function DecisionBanner({
   claireLocation,
   erhardTime,
   claireTime,
+  currentUser = 'erhard',
   onReset,
   onChangeMind,
   _isOnlyStep = false,
   tDecision,
   lang = 'en',
+  isSimulation = false,
 }) {
   const [sendingState, setSendingState] = useState('idle'); // 'idle' | 'sending' | 'sent' | 'activation_needed' | 'error'
   const [statusMsg, setStatusMsg] = useState('');
@@ -161,6 +163,18 @@ export default function DecisionBanner({
 
   const letter = tDecision?.letter || {};
   const punchline = letter.punchlines?.[selectedLocation.id] || letter.punchlines?.default || '';
+  const isErhard = currentUser === 'erhard';
+  const voterName = isErhard ? 'Erhard' : 'Claire';
+  const voterAvatar = isErhard
+    ? `${import.meta.env.BASE_URL}assets/erhard_avatar.png`
+    : `${import.meta.env.BASE_URL}assets/claire_avatar.png`;
+  const changeMindLabel =
+    letter.changeBtn ||
+    (lang === 'de'
+      ? 'Ich ändere meine Meinung!'
+      : lang === 'fr'
+      ? "Je change d'avis !"
+      : 'I change my mind!');
 
   const handleSendToLePoo = async () => {
     if (sendingState === 'sending' || sendingState === 'sent') return;
@@ -183,7 +197,8 @@ export default function DecisionBanner({
         selectedTime,
         punchline,
         letter,
-        lang
+        lang,
+        isSimulation
       });
 
       if (result.success) {
@@ -263,12 +278,18 @@ export default function DecisionBanner({
             <button
               type="button"
               onClick={onChangeMind || onReset}
-              className="px-2 py-1 text-xs font-bold text-amber-900 hover:text-amber-950 bg-amber-100/90 hover:bg-amber-200 border border-amber-400 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs group ml-1"
-              title={letter.changeBtn || (lang === 'fr' ? "Modifier nos choix" : lang === 'de' ? "Auswahl anpassen" : "Change our mind")}
-              aria-label="Change our mind"
+              className={`px-2 py-1 text-xs font-bold border rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs group ml-1 ${
+                isErhard
+                  ? 'text-blue-950 bg-blue-100/90 hover:bg-blue-200 border-blue-400'
+                  : 'text-rose-950 bg-rose-100/90 hover:bg-rose-200 border-rose-400'
+              }`}
+              title={changeMindLabel}
+              aria-label={changeMindLabel}
             >
-              <RotateCcw className="w-3.5 h-3.5 text-amber-700 group-hover:-rotate-45 transition-transform" />
-              <span className="hidden sm:inline font-typewriter">{letter.changeBtn || (lang === 'fr' ? "Modifier" : lang === 'de' ? "Ändern" : "Modify")}</span>
+              <RotateCcw className={`w-3.5 h-3.5 group-hover:-rotate-45 transition-transform ${
+                isErhard ? 'text-blue-700' : 'text-rose-700'
+              }`} />
+              <span className="hidden sm:inline font-typewriter">{changeMindLabel}</span>
             </button>
           </div>
         </div>
@@ -375,7 +396,11 @@ export default function DecisionBanner({
                   : (letter.smsBtn || 'Send to lePoo')}
               </span>
               <span className="text-[11px] font-normal text-emerald-100 font-mono opacity-90 truncate">
-                {sendingState === 'sent' ? (lang === 'fr' ? 'Livré avec succès 🥂' : lang === 'de' ? 'Erfolgreich zugestellt 🥂' : 'Delivered successfully 🥂') : RECIPIENT_EMAIL}
+                {sendingState === 'sent'
+                  ? (lang === 'fr' ? 'Livré avec succès 🥂' : lang === 'de' ? 'Erfolgreich zugestellt 🥂' : 'Delivered successfully 🥂')
+                  : isSimulation
+                  ? '🎮 Simulation Test • Zero emails to Claire or EB'
+                  : RECIPIENT_EMAIL}
               </span>
             </div>
           </div>
@@ -392,22 +417,29 @@ export default function DecisionBanner({
           </div>
         </button>
 
-        {/* Prominent Button Allowing Voters to Change Their Mind / Modify Choices */}
+        {/* Prominent Button Allowing Active Voter to Change Their Mind in their color */}
         <button
           type="button"
           onClick={onChangeMind || onReset}
-          className="w-full min-h-[44px] sm:min-h-[48px] py-2 px-4 rounded-2xl border-2 border-amber-600/80 bg-amber-100/90 hover:bg-amber-200 text-amber-950 font-black text-sm sm:text-base font-typewriter flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all duration-200 active:scale-98 cursor-pointer group"
-          title={lang === 'de' ? 'Auswahl anpassen' : lang === 'fr' ? "Modifier nos choix" : "Change our mind"}
-          aria-label="Change our mind"
+          className={`w-full min-h-[44px] sm:min-h-[48px] py-2 px-4 rounded-2xl border-2 font-black text-sm sm:text-base font-typewriter flex items-center justify-center gap-2.5 shadow-sm hover:shadow-md transition-all duration-200 active:scale-98 cursor-pointer group ${
+            isErhard
+              ? 'border-blue-500 bg-blue-100/90 hover:bg-blue-200 text-blue-950'
+              : 'border-rose-500 bg-rose-100/90 hover:bg-rose-200 text-rose-950'
+          }`}
+          title={changeMindLabel}
+          aria-label={changeMindLabel}
         >
-          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-amber-800 group-hover:-rotate-90 transition-transform duration-300 shrink-0" />
-          <span>
-            {lang === 'de'
-              ? 'Meinung ändern / Auswahl anpassen'
-              : lang === 'fr'
-              ? "Changer d'avis / Modifier nos choix"
-              : 'Change our mind / Modify choices'}
-          </span>
+          <img
+            src={voterAvatar}
+            alt={voterName}
+            className={`w-6 h-6 rounded-full border object-cover shrink-0 shadow-xs ${
+              isErhard ? 'border-blue-500' : 'border-rose-500'
+            }`}
+          />
+          <RotateCcw className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:-rotate-90 transition-transform duration-300 ${
+            isErhard ? 'text-blue-700' : 'text-rose-700'
+          }`} />
+          <span>{changeMindLabel}</span>
         </button>
 
         {/* Feedback Alert if Activation Needed */}

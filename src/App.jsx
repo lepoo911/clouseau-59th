@@ -177,11 +177,15 @@ export default function App() {
           <button
             type="button"
             onClick={handleChangeMind}
-            className="flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-500 text-amber-950 text-xs sm:text-sm font-black font-typewriter shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-            title={lang === 'de' ? 'Auswahl ändern' : lang === 'fr' ? "Modifier nos choix" : 'Change our mind'}
+            className={`flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-xl border-2 text-xs sm:text-sm font-black font-typewriter shadow-xs transition active:scale-95 cursor-pointer shrink-0 ${
+              voting.currentUser === 'erhard'
+                ? 'bg-blue-100/90 hover:bg-blue-200 border-blue-500 text-blue-950'
+                : 'bg-rose-100/90 hover:bg-rose-200 border-rose-500 text-rose-950'
+            }`}
+            title={lang === 'de' ? 'Ich ändere meine Meinung!' : lang === 'fr' ? "Je change d'avis !" : 'I change my mind!'}
           >
-            <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
-            <span>{lang === 'de' ? 'Meinung ändern' : lang === 'fr' ? "Changer d'avis" : 'Change our mind'}</span>
+            <RotateCcw className={`w-3.5 h-3.5 ${voting.currentUser === 'erhard' ? 'text-blue-700' : 'text-rose-700'}`} />
+            <span>{lang === 'de' ? 'Ich ändere meine Meinung!' : lang === 'fr' ? "Je change d'avis !" : 'I change my mind!'}</span>
           </button>
         )}
       </div>
@@ -197,11 +201,13 @@ export default function App() {
           claireLocation={claireLocation}
           erhardTime={voting.erhardVote.time}
           claireTime={voting.claireVote.time}
+          currentUser={voting.currentUser}
           onReset={handleReset}
           onChangeMind={handleChangeMind}
           isOnlyStep={isOnlyStep}
           tDecision={t.decision}
           lang={lang}
+          isSimulation={voting.isSimulation}
         />
       </div>
     </section>
@@ -220,6 +226,7 @@ export default function App() {
         erhardVote={voting.erhardVote}
         claireVote={voting.claireVote}
         isUnanimous={voting.isUnanimous}
+        isSimulation={voting.isSimulation}
       />
 
       {/* 2. Main Center Area: Dynamic Progressive Reveal */}
