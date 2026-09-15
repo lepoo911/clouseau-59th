@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #1a2e22;
+    background: linear-gradient(180deg, #f2f7f0 0%, #eaf2e7 100%);
+  }
+}
+
+.font-serif-vintage {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-typewriter {
+  font-family: 'Special Elite', 'Courier New', monospace;
+}
+
+/* Nature Green Theme: Soft sage & forest parchment cards */
+.parchment-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f7faf5 100%);
+  border: 2px solid #cfe1cb;
+  box-shadow: 0 8px 20px -5px rgba(26, 68, 45, 0.08), 0 4px 6px -2px rgba(26, 68, 45, 0.04);
+}
+
+.parchment-card-active {
+  background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 3px solid #16a34a;
+  box-shadow: 0 16px 28px -6px rgba(22, 163, 74, 0.25), 0 8px 12px -4px rgba(22, 163, 74, 0.15);
+}
+
+/* Accessible focus ring in emerald */
+button:focus-visible, a:focus-visible {
+  outline: 4px solid #15803d;
+  outline-offset: 3px;
+}
+
+/* Nature Stamp effect in forest green */
+.detective-stamp {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+  font-family: 'Special Elite', monospace;
+  font-weight: bold;
+  border: 2px solid #15803d;
+  color: #15803d;
+  transform: rotate(-2deg);
+  border-radius: 4px;
+  letter-spacing: 1.5px;
+  user-select: none;
+}
+
+/* Ensure confetti / overlay canvases remain completely transparent */
+canvas {
+  background-color: transparent !important;
+  pointer-events: none !important;
+}
+
+@keyframes slowReveal {
+  0% {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-slowReveal {
+  animation: slowReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slowFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slowFadeIn {
+  animation: slowFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Dog trotting natural bounce */
+@keyframes dogTrot {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(1.5deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+}
+
+.animate-dog-trot {
+  animation: dogTrot 0.45s ease-in-out infinite;
+}
+
+/* Dog bump recoil bounce */
+@keyframes dogBump {
+  0% {
+    transform: scale(1) translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: scale(0.92) translateX(-10px) rotate(-6deg);
+  }
+  50% {
+    transform: scale(1.08) translateX(6px) rotate(4deg);
+  }
+  75% {
+    transform: scale(0.98) translateX(-3px) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) translateX(0) rotate(0deg);
+  }
+}
+
+.animate-dog-bump {
+  animation: dogBump 0.5s ease-out forwards;
+}
+
+/* UI element jiggle when bumped by a dog */
+@keyframes elementBumped {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  20% {
+    transform: scale(1.015) rotate(-1.2deg);
+  }
+  40% {
+    transform: scale(0.99) rotate(1deg);
+  }
+  65% {
+    transform: scale(1.008) rotate(-0.5deg);
+  }
+  85% {
+    transform: scale(0.998) rotate(0.3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.dog-bumped {
+  animation: elementBumped 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* Disney Inspector Clouseau Suspicious Inquisitive Glance */
+@keyframes clouseauSuspiciousEyes {
+  0%, 100% {
+    transform: scale(1) translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: scale(1.05) translateX(-2px) rotate(-3deg);
+  }
+  30% {
+    transform: scale(1.02) translateX(0px) rotate(0deg);
+  }
+  48% {
+    transform: scale(1.06) translateX(3px) rotate(3deg);
+  }
+  65% {
+    transform: scale(0.97) translateY(1px) rotate(-1deg);
+  }
+  80% {
+    transform: scale(1.08) translateX(-1px) rotate(-2deg);
+  }
+}
+
+.animate-suspicious-clouseau {
+  animation: clouseauSuspiciousEyes 5s infinite ease-in-out;
+}
+
+
+

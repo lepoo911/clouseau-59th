@@ -1,0 +1,222 @@
+// Two-user real-time voting state manager for Erhard & Claire
+import { parseUrlParams, syncUrlParams } from './urlState';
+
+export const USERS = {
+  erhard: {
+    id: 'erhard',
+    name: 'Erhard',
+    roleLabel: 'EB',
+    colorName: 'blue',
+    hex: '#2563eb',
+    badgeBg: 'bg-blue-600 text-white',
+    ringColor: 'ring-blue-500',
+    borderColor: 'border-blue-500',
+    lightBg: 'bg-blue-50',
+    dotColor: 'bg-blue-500',
+    avatar: 'assets/erhard_avatar.png',
+    emoji: '👨‍🦳'
+  },
+  claire: {
+    id: 'claire',
+    name: 'Claire',
+    roleLabel: 'Claire',
+    colorName: 'rose',
+    hex: '#e11d48',
+    badgeBg: 'bg-rose-600 text-white',
+    ringColor: 'ring-rose-500',
+    borderColor: 'border-rose-500',
+    lightBg: 'bg-rose-50',
+    dotColor: 'bg-rose-500',
+    avatar: 'assets/claire_avatar.png',
+    emoji: '👩‍🦳'
+  }
+};
+
+const STORAGE_KEY = 'birthday_voting_v2';
+const USER_STORAGE_KEY = 'birthday_voting_current_user';
+
+class VotingManager {
+  constructor() {
+    this.listeners = new Set();
+    this.votes = {
+      erhard: { locationId: null, time: null },
+      claire: { locationId: null, time: null }
+    };
+    this.currentUser = 'erhard';
+    this.channel = null;
+
+    if (typeof window !== 'undefined') {
+      // 1. Determine current user from URL or storage
+      const urlParams = parseUrlParams();
+      if (urlParams.user && (urlParams.user === 'erhard' || urlParams.user === 'claire')) {
+        this.currentUser = urlParams.user;
+      } else {
+        const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+        if (storedUser === 'erhard' || storedUser === 'claire') {
+          this.currentUser = storedUser;
+        }
+      }
+
+      // 2. Load stored votes from localStorage if available
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.erhard && parsed?.claire) {
+            this.votes = parsed;
+          }
+        }
+      } catch {
+        // Fallback to empty votes
+      }
+
+      // 3. Fallback: If legacy URL params had spot/time, seed active user's vote
+      if (urlParams.spot && !this.votes[this.currentUser].locationId) {
+        this.votes[this.currentUser].locationId = urlParams.spot;
+      }
+      if (urlParams.time && !this.votes[this.currentUser].time) {
+        this.votes[this.currentUser].time = urlParams.time;
+      }
+
+      // 4. Setup BroadcastChannel for sub-millisecond tab-to-tab sync
+      try {
+        if ('BroadcastChannel' in window) {
+          this.channel = new BroadcastChannel('birthday_voting_channel');
+          this.channel.onmessage = (event) => {
+            if (event.data?.type === 'VOTES_UPDATED' && event.data?.votes) {
+              this.votes = event.data.votes;
+              this.notify();
+            }
+          };
+        }
+      } catch {
+        // BroadcastChannel unavailable
+      }
+
+      // 5. Fallback cross-tab sync via storage events
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY && e.newValue) {
+          try {
+            const incoming = JSON.parse(e.newValue);
+            if (incoming?.erhard && incoming?.claire) {
+              this.votes = incoming;
+              this.notify();
+            }
+          } catch {
+            // Ignore parse errors
+          }
+        }
+      });
+    }
+  }
+
+  saveAndBroadcast() {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.votes));
+      localStorage.setItem(USER_STORAGE_KEY, this.currentUser);
+      if (this.channel) {
+        this.channel.postMessage({
+          type: 'VOTES_UPDATED',
+          votes: this.votes,
+          sender: this.currentUser,
+          timestamp: Date.now()
+        });
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  subscribe(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  notify() {
+    const state = this.getState();
+    this.listeners.forEach((cb) => {
+      try {
+        cb(state);
+      } catch (err) {
+        console.error('Error in votingState listener:', err);
+      }
+    });
+  }
+
+  getState() {
+    const isLocUnanimous = Boolean(
+      this.votes.erhard.locationId &&
+      this.votes.claire.locationId &&
+      this.votes.erhard.locationId === this.votes.claire.locationId
+    );
+
+    const isTimeUnanimous = Boolean(
+      this.votes.erhard.time &&
+      this.votes.claire.time &&
+      this.votes.erhard.time === this.votes.claire.time
+    );
+
+    return {
+      votes: this.votes,
+      currentUser: this.currentUser,
+      otherUser: this.currentUser === 'erhard' ? 'claire' : 'erhard',
+      isLocationUnanimous: isLocUnanimous,
+      isTimeUnanimous: isTimeUnanimous,
+      isUnanimous: isLocUnanimous && isTimeUnanimous,
+      agreedLocationId: isLocUnanimous ? this.votes.erhard.locationId : null,
+      agreedTime: isTimeUnanimous ? this.votes.erhard.time : null,
+      erhardVote: this.votes.erhard,
+      claireVote: this.votes.claire
+    };
+  }
+
+  setCurrentUser(user) {
+    if (user !== 'erhard' && user !== 'claire') return;
+    this.currentUser = user;
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(USER_STORAGE_KEY, user);
+        syncUrlParams({ user });
+      } catch {
+        // Ignore
+      }
+    }
+    this.notify();
+  }
+
+  voteLocation(locationId, user = this.currentUser) {
+    if (!this.votes[user]) return;
+    // Toggle off if already selected by this user
+    if (this.votes[user].locationId === locationId) {
+      this.votes[user].locationId = null;
+    } else {
+      this.votes[user].locationId = locationId;
+    }
+    this.saveAndBroadcast();
+    this.notify();
+  }
+
+  voteTime(time, user = this.currentUser) {
+    if (!this.votes[user]) return;
+    // Toggle off if already selected by this user
+    if (this.votes[user].time === time) {
+      this.votes[user].time = null;
+    } else {
+      this.votes[user].time = time;
+    }
+    this.saveAndBroadcast();
+    this.notify();
+  }
+
+  resetVotes() {
+    this.votes = {
+      erhard: { locationId: null, time: null },
+      claire: { locationId: null, time: null }
+    };
+    this.saveAndBroadcast();
+    this.notify();
+  }
+}
+
+export const votingManager = new VotingManager();

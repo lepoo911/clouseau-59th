@@ -1,0 +1,226 @@
+export const MUSIC_TRACKS = [
+  {
+    id: 'trenet_lamer',
+    title: {
+      en: 'La Mer (Charles Trenet)',
+      fr: 'La Mer (Charles Trenet)',
+      de: 'La Mer (Charles Trenet)',
+    },
+    subtitle: {
+      en: '« La mer qu\'on voit danser »',
+      fr: '« La mer qu\'on voit danser »',
+      de: '« La mer qu\'on voit danser »',
+    },
+    artist: 'Charles Trenet (1946)',
+    category: 'crooner',
+    categoryLabel: {
+      en: 'French Crooner',
+      fr: 'Crooner Français',
+      de: 'Französischer Crooner',
+    },
+    badge: {
+      en: '🌊 French Classic',
+      fr: '🌊 Grand Classique Français',
+      de: '🌊 Französischer Klassiker',
+    },
+    image: 'assets/music/trenet.jpg',
+    src: '/music/trenet_lamer.mp3',
+    description: {
+      en: 'The immortal French chanson swinging anthem of romance and the sea.',
+      fr: 'L\'hymne immortel de la chanson française et du swing poétique.',
+      de: 'Die unvergängliche Hymne des französischen Chansons und beschwingten Swings.',
+    },
+  },
+  {
+    id: 'montand_feuilles',
+    title: {
+      en: 'Les Feuilles Mortes (Yves Montand)',
+      fr: 'Les Feuilles Mortes (Yves Montand)',
+      de: 'Les Feuilles Mortes (Yves Montand)',
+    },
+    subtitle: {
+      en: '« C\'est une chanson qui nous ressemble »',
+      fr: '« C\'est une chanson qui nous ressemble »',
+      de: '« C\'est une chanson qui nous ressemble »',
+    },
+    artist: 'Yves Montand (1949)',
+    category: 'crooner',
+    categoryLabel: {
+      en: 'French Crooner',
+      fr: 'Crooner Français',
+      de: 'Französischer Crooner',
+    },
+    badge: {
+      en: '🍂 Velvet Crooner',
+      fr: '🍂 Velours & Poésie',
+      de: '🍂 Samtiger Crooner',
+    },
+    image: 'assets/music/montand.jpg',
+    src: '/music/montand_feuilles.mp3',
+    description: {
+      en: 'Prévert & Kosma\'s timeless masterpiece sung by the deep, warm baritone of Yves Montand.',
+      fr: 'Le chef-d\'œuvre de Prévert et Kosma porté par la voix de velours d\'Yves Montand.',
+      de: 'Das Meisterwerk von Prévert und Kosma, gesungen mit dem warmen Bariton von Yves Montand.',
+    },
+  },
+  {
+    id: 'clouseau',
+    title: {
+      en: 'Inspector Clouseau Swing',
+      fr: 'Inspecteur Clouseau Big Band Swing',
+      de: 'Inspektor Clouseau Big Band Swing',
+    },
+    subtitle: {
+      en: 'Covert Affair & Detective Horns',
+      fr: 'Affaire Secrète & Cuivres',
+      de: 'Geheime Ermittlung & Detektiv-Bläser',
+    },
+    artist: 'Kevin MacLeod (Covert Affair)',
+    category: 'swing',
+    categoryLabel: {
+      en: 'Big Band Swing',
+      fr: 'Big Band Swing',
+      de: 'Big Band Swing',
+    },
+    badge: {
+      en: '🎷 Detective Swing',
+      fr: '🎷 Thème Enquête',
+      de: '🎷 Detektiv-Swing',
+    },
+    image: 'assets/music/clouseau.jpg',
+    src: '/music/clouseau_swing.mp3',
+    description: {
+      en: 'The quintessential Pink Panther style detective jazz atmosphere.',
+      fr: 'L\'ambiance sonore idéale de la Panthère Rose et des filatures secrètes.',
+      de: 'Die unverwechselbare Jazz- und Krimi-Atmosphäre im Stil des Rosaroten Panthers.',
+    },
+  },
+  {
+    id: 'mozart',
+    title: {
+      en: 'Joyful Symphony (Mozart)',
+      fr: 'Symphonie Joyeuse (Mozart)',
+      de: 'Fröhliche Symphonie (Mozart)',
+    },
+    subtitle: {
+      en: 'Eine kleine Nachtmusik - Allegro',
+      fr: 'Eine kleine Nachtmusik - Allegro',
+      de: 'Eine kleine Nachtmusik - Allegro',
+    },
+    artist: 'Advent Chamber Orchestra',
+    category: 'symphonic',
+    categoryLabel: {
+      en: 'Symphonic',
+      fr: 'Symphonique',
+      de: 'Symphonisch',
+    },
+    badge: {
+      en: '🎻 Uplifting Classical',
+      fr: '🎻 Classique Énergique',
+      de: '🎻 Schwungvolle Klassik',
+    },
+    image: 'assets/music/mozart.jpg',
+    src: '/music/mozart_symphony.mp3',
+    description: {
+      en: 'Lush, radiant strings celebrating a very special birthday rendezvous.',
+      fr: 'Cordes éclatantes et joyeuses pour célébrer cette grande journée.',
+      de: 'Strahlende, festliche Streicherklänge zur Feier dieses ganz besonderen Geburtstags-Treffens.',
+    },
+  },
+  {
+    id: 'strauss',
+    title: {
+      en: 'The Blue Danube Waltz (Strauss)',
+      fr: 'Le Beau Danube Bleu (Strauss)',
+      de: 'An der schönen blauen Donau (Strauss)',
+    },
+    subtitle: {
+      en: 'Celebrated Viennese Waltz',
+      fr: 'Valse Viennoise Célèbre',
+      de: 'Berühmter Wiener Walzer',
+    },
+    artist: 'Johann Strauss II / Vienna Philharmonic',
+    category: 'symphonic',
+    categoryLabel: {
+      en: 'Symphonic',
+      fr: 'Symphonique',
+      de: 'Symphonisch',
+    },
+    badge: {
+      en: '👑 Imperial Waltz',
+      fr: '👑 Valse Impériale',
+      de: '👑 Kaiserlicher Walzer',
+    },
+    image: 'assets/music/strauss.jpg',
+    src: '/music/strauss_waltz.mp3',
+    description: {
+      en: 'Grand, celebratory orchestral waltz fit for an anniversary feast.',
+      fr: 'Une somptueuse valse symphonique digne d’un grand dîner d’anniversaire.',
+      de: 'Ein festlicher orchestraler Walzer, wie geschaffen für ein festliches Geburtstagsessen.',
+    },
+  },
+  {
+    id: 'crooner',
+    title: {
+      en: 'Vintage Crooner (Gene Austin)',
+      fr: 'Le Crooner Rétro (Gene Austin)',
+      de: 'Nostalgischer Crooner (Gene Austin)',
+    },
+    subtitle: {
+      en: '« Yes Sir, That\'s My Baby »',
+      fr: '« Yes Sir, That\'s My Baby »',
+      de: '« Yes Sir, That\'s My Baby »',
+    },
+    artist: 'Gene Austin (1925)',
+    category: 'crooner',
+    categoryLabel: {
+      en: 'Crooner',
+      fr: 'Crooner',
+      de: 'Crooner',
+    },
+    badge: {
+      en: '🎙️ Legendary Crooner',
+      fr: '🎙️ Crooner Légendaire',
+      de: '🎙️ Legendärer Crooner',
+    },
+    image: 'assets/music/crooner.jpg',
+    src: '/music/crooner_vintage.mp3',
+    description: {
+      en: 'The timeless Roaring Twenties charm—upbeat, warm, and swinging.',
+      fr: 'Le charme intemporel des années folles, optimiste et entraînant.',
+      de: 'Der zeitlose Charme der Goldenen Zwanziger – heiter, warmherzig und beschwingt.',
+    },
+  },
+  {
+    id: 'apero',
+    title: {
+      en: 'Terrace & Apéro Lounge',
+      fr: 'Apéro & Café Rendez-vous',
+      de: 'Terrasse & Apéro Lounge',
+    },
+    subtitle: {
+      en: 'Relaxed Crooner Cocktail',
+      fr: 'Lounge Crooner Décontracté',
+      de: 'Entspannter Crooner-Cocktail',
+    },
+    artist: 'Kevin MacLeod (Apero Hour)',
+    category: 'crooner',
+    categoryLabel: {
+      en: 'Crooner Lounge',
+      fr: 'Crooner Lounge',
+      de: 'Crooner Lounge',
+    },
+    badge: {
+      en: '🍷 Sunny Terrace',
+      fr: '🍷 Douceur Festive',
+      de: '🍷 Sonnige Terrasse',
+    },
+    image: 'assets/music/apero.jpg',
+    src: '/music/apero_lounge.mp3',
+    description: {
+      en: 'Warm, relaxed café vibes for sharing coffee or wine with loved ones.',
+      fr: 'L’ambiance chaleureuse d’une terrasse ensoleillée entre amis.',
+      de: 'Warme, entspannte Kaffeehaus-Stimmung für Kaffee oder Wein im Kreise der Liebsten.',
+    },
+  },
+];
