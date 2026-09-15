@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fireConfetti } from '../utils/confetti';
-import { Clock, Mail, RefreshCw } from 'lucide-react';
+import { Clock, Mail, RefreshCw, Loader2, CheckCircle2, AlertCircle, ExternalLink, X } from 'lucide-react';
 import { sound } from '../utils/soundEffects';
+import { sendVerdictInBackground, generateRichEmailHtml, RECIPIENT_EMAIL } from '../utils/emailService';
 
 export default function DecisionBanner({
   selectedLocation,
@@ -17,6 +18,10 @@ export default function DecisionBanner({
   tDecision,
   lang = 'en',
 }) {
+  const [sendingState, setSendingState] = useState('idle'); // 'idle' | 'sending' | 'sent' | 'activation_needed' | 'error'
+  const [statusMsg, setStatusMsg] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+
   useEffect(() => {
     if (isUnanimous && selectedLocation && selectedTime) {
       // Fire celebratory confetti!
@@ -156,32 +161,58 @@ export default function DecisionBanner({
   const letter = tDecision?.letter || {};
   const punchline = letter.punchlines?.[selectedLocation.id] || letter.punchlines?.default || '';
 
-  const emailRecipient = 'tubywuby@gmail.com';
-  const emailSubject = lang === 'fr'
-    ? `lePoo's 59 - Verdict officiel de EB & Claire : ${selectedLocation.title} à ${selectedTime} ⛳`
-    : lang === 'de'
-    ? `lePoo's 59 - Offizielles Urteil von EB & Claire : ${selectedLocation.title} um ${selectedTime} ⛳`
-    : `lePoo's 59 - Official Verdict from EB & Claire : ${selectedLocation.title} at ${selectedTime} ⛳`;
+  const handleSendToLePoo = async () => {
+    if (sendingState === 'sending' || sendingState === 'sent') return;
+    sound.playFanfare();
 
-  const emailBody = typeof tDecision?.smsMessage === 'function'
-    ? tDecision.smsMessage(selectedLocation.title, selectedLocation.address, selectedTime)
-    : `Dear Jacques (lePoo)! Official 19th-hole verdict for your 59th birthday: We have locked in ${selectedLocation.title} at ${selectedTime}! Ready our table at the clubhouse, no mulligans allowed! - EB & Claire ⛳`;
+    // 1. Initial Confetti Celebration Blast!
+    fireConfetti({
+      particleCount: 120,
+      spread: 90,
+      origin: { y: 0.6 },
+      colors: ['#2563eb', '#e11d48', '#f59e0b', '#10b981', '#ffffff']
+    });
 
-  const handleSendToLePoo = () => {
-    sound.playClick();
-    const mailtoUrl = `mailto:${emailRecipient}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailRecipient)}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    setSendingState('sending');
+    setStatusMsg('');
 
-    // If mobile, open native email client / Gmail app
-    const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      window.location.href = mailtoUrl;
-    } else {
-      // On desktop, open Gmail compose tab with mailto fallback
-      const win = window.open(gmailUrl, '_blank');
-      if (!win || win.closed || typeof win.closed === 'undefined') {
-        window.location.href = mailtoUrl;
+    try {
+      const result = await sendVerdictInBackground({
+        selectedLocation,
+        selectedTime,
+        punchline,
+        letter,
+        lang
+      });
+
+      if (result.success) {
+        setSendingState('sent');
+        // 2. Extra victory celebration cannons!
+        setTimeout(() => {
+          sound.playFanfare();
+          fireConfetti({
+            particleCount: 80,
+            angle: 60,
+            spread: 70,
+            origin: { x: 0.05, y: 0.7 }
+          });
+          fireConfetti({
+            particleCount: 80,
+            angle: 120,
+            spread: 70,
+            origin: { x: 0.95, y: 0.7 }
+          });
+        }, 300);
+      } else if (result.needsActivation) {
+        setSendingState('activation_needed');
+        setStatusMsg(result.message);
+      } else {
+        setSendingState('error');
+        setStatusMsg(result.message || 'Background transmission error.');
       }
+    } catch (err) {
+      setSendingState('error');
+      setStatusMsg(err.message || 'Network error.');
     }
   };
 
@@ -308,14 +339,21 @@ export default function DecisionBanner({
         </div>
       </div>
 
-      {/* Action Button Below the Letter: Send to lePoo with his suspicious face */}
-      <div className="pt-2.5 border-t border-amber-800/20 shrink-0 mt-1">
+      {/* Action Button Below the Letter: Send to lePoo in the background */}
+      <div className="pt-2.5 border-t border-amber-800/20 shrink-0 mt-1 space-y-1.5">
         <button
           type="button"
           onClick={handleSendToLePoo}
-          title={`Send verdict to tubywuby@gmail.com`}
-          aria-label={`Send verdict to tubywuby@gmail.com`}
-          className="w-full min-h-[50px] sm:min-h-[54px] py-2 sm:py-2.5 px-4 rounded-2xl bg-emerald-700 hover:bg-emerald-600 text-white text-base sm:text-lg font-black flex items-center justify-between gap-3 shadow-lg hover:shadow-xl cursor-pointer transition-all duration-200 active:scale-98 group"
+          disabled={sendingState === 'sending' || sendingState === 'sent'}
+          title={`Send verdict to ${RECIPIENT_EMAIL} in background`}
+          aria-label={`Send verdict to ${RECIPIENT_EMAIL}`}
+          className={`w-full min-h-[50px] sm:min-h-[54px] py-2 sm:py-2.5 px-4 rounded-2xl text-white text-base sm:text-lg font-black flex items-center justify-between gap-3 shadow-lg transition-all duration-200 ${
+            sendingState === 'sent'
+              ? 'bg-emerald-800 ring-4 ring-emerald-400/60 cursor-default scale-[1.01]'
+              : sendingState === 'sending'
+              ? 'bg-emerald-700/80 cursor-wait'
+              : 'bg-emerald-700 hover:bg-emerald-600 hover:shadow-xl cursor-pointer active:scale-98 group'
+          }`}
         >
           {/* lePoo's Suspicious Face Avatar */}
           <div className="flex items-center gap-3 min-w-0">
@@ -327,13 +365,130 @@ export default function DecisionBanner({
               />
             </div>
             <div className="flex flex-col text-left leading-tight min-w-0">
-              <span className="truncate">{letter.smsBtn || 'Send to lePoo'}</span>
-              <span className="text-[11px] font-normal text-emerald-100 font-mono opacity-90 truncate">tubywuby@gmail.com</span>
+              <span className="truncate">
+                {sendingState === 'sent'
+                  ? (lang === 'fr' ? '✓ Transmis à lePoo ! Affaire classée 🥂' : lang === 'de' ? '✓ An lePoo gesendet! Fall gelöst 🥂' : '✓ Transmitted to lePoo! Case Solved 🥂')
+                  : sendingState === 'sending'
+                  ? (lang === 'fr' ? 'Transmission en arrière-plan...' : lang === 'de' ? 'Wird im Hintergrund gesendet...' : 'Transmitting in background...')
+                  : (letter.smsBtn || 'Send to lePoo')}
+              </span>
+              <span className="text-[11px] font-normal text-emerald-100 font-mono opacity-90 truncate">
+                {sendingState === 'sent' ? 'Delivered silently in background' : RECIPIENT_EMAIL}
+              </span>
             </div>
           </div>
-          <Mail className="w-5 h-5 text-emerald-200 group-hover:scale-110 group-hover:text-white transition-all shrink-0 ml-2" />
+
+          {/* Right Icon */}
+          <div className="shrink-0 ml-2">
+            {sendingState === 'sending' ? (
+              <Loader2 className="w-5 h-5 text-amber-200 animate-spin" />
+            ) : sendingState === 'sent' ? (
+              <CheckCircle2 className="w-6 h-6 text-emerald-300 animate-bounce" />
+            ) : (
+              <Mail className="w-5 h-5 text-emerald-200 group-hover:scale-110 group-hover:text-white transition-all" />
+            )}
+          </div>
         </button>
+
+        {/* Feedback Alert if Activation Needed */}
+        {sendingState === 'activation_needed' && (
+          <div className="bg-amber-100 border border-amber-400 text-amber-900 rounded-xl p-2.5 text-xs text-left leading-snug animate-fadeIn shadow-xs">
+            <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-950">
+              <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+              <span>One-Time Form Activation Required:</span>
+            </div>
+            <p className="text-[11px] text-amber-900 mb-1.5">
+              FormSubmit sent an activation email to <strong>{RECIPIENT_EMAIL}</strong>. Please check your inbox (or spam) and click <em>"Activate Form"</em>, then click <strong>Send to lePoo</strong> again!
+            </p>
+            <div className="flex items-center gap-2 pt-1 border-t border-amber-300/60">
+              <button
+                type="button"
+                onClick={() => setSendingState('idle')}
+                className="text-[11px] font-bold text-amber-800 hover:text-amber-950 underline cursor-pointer"
+              >
+                Done activating? Retry sending
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Error Notice */}
+        {sendingState === 'error' && (
+          <div className="bg-red-50 border border-red-300 text-red-900 rounded-xl p-2 text-xs text-left flex items-center justify-between gap-2 animate-fadeIn shadow-xs">
+            <span className="text-[11px] truncate">{statusMsg}</span>
+            <button
+              type="button"
+              onClick={() => setSendingState('idle')}
+              className="text-[11px] font-bold text-red-800 underline shrink-0 cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Helper Link: Preview Rich HTML Email */}
+        <div className="flex items-center justify-between text-[11px] text-stone-500 font-sans px-1">
+          <span className="truncate">Sent in background with rich letterhead & stamps</span>
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            className="text-amber-800 hover:text-amber-950 font-bold underline flex items-center gap-1 cursor-pointer shrink-0 ml-2"
+          >
+            <span>Preview Email Design</span>
+            <ExternalLink className="w-3 h-3" />
+          </button>
+        </div>
       </div>
+
+      {/* Rich Email Preview Modal Overlay */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+          <div className="bg-[#f4f1ea] border-3 border-amber-700 rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-amber-100 border-b border-amber-300">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-black font-serif-vintage text-stone-900">
+                  Rich Email Preview (Sent to {RECIPIENT_EMAIL})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className="p-1.5 rounded-full hover:bg-amber-200 text-stone-700 hover:text-stone-950 transition cursor-pointer"
+                aria-label="Close Preview"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content: Rendered Rich HTML */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <iframe
+                title="Rich Email HTML Preview"
+                srcDoc={generateRichEmailHtml({
+                  selectedLocation,
+                  selectedTime,
+                  punchline,
+                  letter,
+                  lang
+                })}
+                className="w-full h-[520px] rounded-xl border border-amber-300 shadow-inner bg-white"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-4 py-2.5 bg-amber-50 border-t border-amber-200 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className="px-4 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold font-typewriter transition cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
