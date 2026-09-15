@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Database } from 'lucide-react';
 import { sound } from '../utils/soundEffects';
 
 function SuspiciousClouseau({ lang = 'en', isUnanimous = false }) {
@@ -117,6 +117,8 @@ export default function Header({
   claireVote = {},
   isUnanimous = false,
   isSimulation = false,
+  showData = false,
+  onToggleData,
 }) {
   const languages = [
     { code: 'fr', label: 'FR', title: 'Français' },
@@ -299,11 +301,7 @@ export default function Header({
           <span className="text-lg sm:text-2xl animate-pulse" aria-hidden="true">🎂</span>
         </div>
         <p className="text-sm sm:text-base md:text-lg font-black text-emerald-800 font-serif-vintage tracking-wider truncate mt-0.5">
-          {isSimulation ? (
-            <span className="inline-flex items-center gap-1 text-xs sm:text-sm bg-purple-100 text-purple-900 border border-purple-300 px-2.5 py-0.5 rounded-full font-bold font-typewriter">
-              🎮 Simulation Mode • Click avatars to switch user
-            </span>
-          ) : isUnanimous ? (
+          {isUnanimous ? (
             (lang === 'de' ? '🤝 Einstimmiges Scorecard-Urteil !' : lang === 'fr' ? '🤝 Accord unanime des golfeurs !' : '🤝 Unanimous Golfers\' Verdict!')
           ) : (
             (t?.header?.forClaireErhard || "EB & Claire")
@@ -311,8 +309,31 @@ export default function Header({
         </p>
       </div>
 
-      {/* Right Controls: Restart Button & 3-Way Language Selector */}
+      {/* Right Controls: Real Data Toggle, Restart Button & 3-Way Language Selector */}
       <div className="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
+
+        {/* Real Data Toggle Button (Read-Only) - only visible in simulation mode, never to Claire or EB */}
+        {isSimulation && onToggleData && (
+          <div className="flex items-center bg-amber-100/90 rounded-xl p-1 border border-amber-300 shadow-inner">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                onToggleData();
+              }}
+              className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-black font-typewriter transition cursor-pointer ${
+                showData
+                  ? 'bg-amber-500 text-stone-950 shadow-xs ring-1 ring-amber-600/30'
+                  : 'text-stone-700 hover:text-stone-950 hover:bg-amber-200/70'
+              }`}
+              title="Toggle Real Data (Read-Only)"
+              aria-label="Real Data"
+            >
+              <Database className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-700" />
+              <span>Data</span>
+            </button>
+          </div>
+        )}
 
         {/* Restart Button (Styled identically to Language Selector) */}
         <div className="flex items-center bg-amber-100/90 rounded-xl p-1 border border-amber-300 shadow-inner">

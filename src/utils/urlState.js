@@ -14,7 +14,7 @@ export function parseUrlParams() {
   const lang = params.get('lang');
   const user = params.get('user');
   const mode = params.get('mode');
-  const isSimulation = mode === 'simulation' || mode === 'test' || mode === 'sandbox' || params.get('test') === 'true' || params.get('sandbox') === 'true';
+  const isSimulation = mode === 'simulation' || mode === 'test' || mode === 'sandbox' || params.get('test') === 'true' || params.get('sandbox') === 'true' || params.get('debug') === 'true' || params.get('data') === 'true';
   const e_spot = params.get('e_spot') || params.get('eb_spot');
   const e_time = params.get('e_time') || params.get('eb_time');
   const c_spot = params.get('c_spot') || params.get('claire_spot');

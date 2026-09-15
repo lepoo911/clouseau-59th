@@ -6,6 +6,8 @@ import TimeSelector from './components/TimeSelector';
 import DecisionBanner from './components/DecisionBanner';
 import MusicPlayer from './components/MusicPlayer';
 import WanderingDogs from './components/WanderingDogs';
+import RealDataModal from './components/RealDataModal';
+import SmallScreenNotice from './components/SmallScreenNotice';
 import { TRANSLATIONS } from './data/translations';
 import { sound } from './utils/soundEffects';
 import { parseUrlParams, syncUrlParams } from './utils/urlState';
@@ -26,12 +28,43 @@ export default function App() {
 
   const [voting, setVoting] = useState(() => votingManager.getState());
   const [isModifying, setIsModifying] = useState(false);
+  const [showDataModal, setShowDataModal] = useState(false);
+
+  const [isSmallScreen, setIsSmallScreen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+  const [hasDismissedSmallNotice, setHasDismissedSmallNotice] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = votingManager.subscribe((newState) => {
       setVoting(newState);
     });
     return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (
+        (e.key === 'D' || e.key === 'd') &&
+        !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) &&
+        !e.metaKey && !e.ctrlKey
+      ) {
+        setShowDataModal((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
@@ -213,6 +246,16 @@ export default function App() {
     </section>
   );
 
+  if (isSmallScreen && !hasDismissedSmallNotice) {
+    return (
+      <SmallScreenNotice
+        lang={lang}
+        onSelectLang={handleSelectLang}
+        onOverride={() => setHasDismissedSmallNotice(true)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen min-h-[100dvh] md:h-screen md:max-h-[100dvh] w-full overflow-x-hidden overflow-y-auto md:overflow-hidden flex flex-col justify-between bg-[#faf7f0] p-2 sm:p-3 text-stone-900 selection:bg-amber-200">
       {/* 1. Header at Top with Separated Erhard & Claire Avatars */}
@@ -227,6 +270,16 @@ export default function App() {
         claireVote={voting.claireVote}
         isUnanimous={voting.isUnanimous}
         isSimulation={voting.isSimulation}
+        showData={showDataModal}
+        onToggleData={() => setShowDataModal((prev) => !prev)}
+      />
+
+      {/* Read-Only Real Data Modal */}
+      <RealDataModal
+        isOpen={showDataModal}
+        onClose={() => setShowDataModal(false)}
+        voting={voting}
+        locations={locations}
       />
 
       {/* 2. Main Center Area: Dynamic Progressive Reveal */}

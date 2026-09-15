@@ -255,6 +255,42 @@ class VotingManager {
     this.saveAndBroadcast();
     this.notify();
   }
+
+  toggleSimulation() {
+    this.isSimulation = !this.isSimulation;
+    if (this.isSimulation) {
+      this.storageKey = 'birthday_voting_sandbox';
+      this.userStorageKey = 'birthday_voting_sandbox_user';
+      this.channelName = 'birthday_voting_sandbox_channel';
+    } else {
+      this.storageKey = STORAGE_KEY;
+      this.userStorageKey = USER_STORAGE_KEY;
+      this.channelName = 'birthday_voting_channel';
+    }
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (this.isSimulation) {
+        params.set('mode', 'simulation');
+      } else {
+        params.delete('mode');
+        params.delete('test');
+        params.delete('sandbox');
+      }
+      const search = params.toString();
+      const newPath = search ? `${window.location.pathname}?${search}` : window.location.pathname;
+      window.history.replaceState(null, '', newPath);
+    }
+    this.saveAndBroadcast();
+    this.notify();
+  }
+
+  setVotesForSimulation(erhardVote, claireVote) {
+    if (erhardVote) this.votes.erhard = { ...this.votes.erhard, ...erhardVote };
+    if (claireVote) this.votes.claire = { ...this.votes.claire, ...claireVote };
+    this.saveAndBroadcast();
+    this.notify();
+  }
 }
 
 export const votingManager = new VotingManager();
