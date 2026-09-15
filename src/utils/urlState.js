@@ -13,13 +13,21 @@ export function parseUrlParams() {
   const time = params.get('time');
   const lang = params.get('lang');
   const user = params.get('user');
+  const e_spot = params.get('e_spot') || params.get('eb_spot');
+  const e_time = params.get('e_time') || params.get('eb_time');
+  const c_spot = params.get('c_spot') || params.get('claire_spot');
+  const c_time = params.get('c_time') || params.get('claire_time');
 
   return {
     spot: spot || null,
     time: time || null,
     lang: ['fr', 'en', 'de'].includes(lang) ? lang : null,
     user: user === 'erhard' || user === 'claire' ? user : null,
-    isSharedInvite: Boolean(spot)
+    e_spot: e_spot || null,
+    e_time: e_time || null,
+    c_spot: c_spot || null,
+    c_time: c_time || null,
+    isSharedInvite: Boolean(spot || e_spot || c_spot)
   };
 }
 

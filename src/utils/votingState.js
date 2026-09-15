@@ -70,7 +70,13 @@ class VotingManager {
         // Fallback to empty votes
       }
 
-      // 3. Fallback: If legacy URL params had spot/time, seed active user's vote
+      // 3. Seed votes from URL parameters (supports cross-device link sharing)
+      if (urlParams.e_spot) this.votes.erhard.locationId = urlParams.e_spot;
+      if (urlParams.e_time) this.votes.erhard.time = urlParams.e_time;
+      if (urlParams.c_spot) this.votes.claire.locationId = urlParams.c_spot;
+      if (urlParams.c_time) this.votes.claire.time = urlParams.c_time;
+
+      // Fallback: If legacy URL params had spot/time, seed active user's vote
       if (urlParams.spot && !this.votes[this.currentUser].locationId) {
         this.votes[this.currentUser].locationId = urlParams.spot;
       }
@@ -115,6 +121,22 @@ class VotingManager {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.votes));
       localStorage.setItem(USER_STORAGE_KEY, this.currentUser);
+
+      // Keep URL updated with state so if link is copied/shared it reflects current selections
+      const params = new URLSearchParams(window.location.search);
+      params.set('user', this.currentUser);
+      if (this.votes.erhard.locationId) params.set('e_spot', this.votes.erhard.locationId);
+      else params.delete('e_spot');
+      if (this.votes.erhard.time) params.set('e_time', this.votes.erhard.time);
+      else params.delete('e_time');
+      if (this.votes.claire.locationId) params.set('c_spot', this.votes.claire.locationId);
+      else params.delete('c_spot');
+      if (this.votes.claire.time) params.set('c_time', this.votes.claire.time);
+      else params.delete('c_time');
+      
+      const newPath = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState(null, '', newPath);
+
       if (this.channel) {
         this.channel.postMessage({
           type: 'VOTES_UPDATED',

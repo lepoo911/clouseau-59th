@@ -5,6 +5,7 @@
 
 const GITHUB_PAGES_BASE = 'https://lepoo911.github.io/clouseau-59th';
 export const RECIPIENT_EMAIL = 'tubywuby@gmail.com';
+export const CC_EMAILS = 'clairedec42@yahoo.com, erhardbuchholz@gmail.com';
 export const GOOGLE_SCRIPT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxnxYfa2uAtg9nK-3C4BA-TCb36H5qqLR6xkba_uUN24pbN1R9eNTvW4zkjJj7ECfRb_A/exec';
 
 /**
@@ -51,12 +52,13 @@ export function generateRichEmailHtml({
         <!-- Dispatch Letter Card -->
         <div style="background-color:#fdfcf7; border:3px solid #b45309; border-radius:18px; padding:24px 20px; box-shadow:0 10px 25px rgba(0,0,0,0.08);">
           
-          <!-- Top Header: TO / FROM / RE + 59c Stamp -->
+          <!-- Top Header: TO / FROM / CC / RE + 59c Stamp -->
           <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-bottom:1px solid #d97706; padding-bottom:14px; margin-bottom:16px;">
             <tr>
               <td valign="top" style="font-family:'Courier New', Courier, monospace; font-size:13px; line-height:1.6; color:#1c1917;">
                 <div><span style="color:#78350f; font-weight:bold;">TO :</span> <strong>${toName}</strong></div>
                 <div><span style="color:#78350f; font-weight:bold;">FROM :</span> <strong>${fromName}</strong></div>
+                <div><span style="color:#78350f; font-weight:bold;">CC :</span> <span style="color:#57534e; font-size:11px;">clairedec42@yahoo.com, erhardbuchholz@gmail.com</span></div>
                 <div><span style="color:#78350f; font-weight:bold;">RE :</span> <span style="color:#047857; font-weight:bold;">${subject}</span></div>
               </td>
               <td valign="top" align="right" style="width:75px; padding-left:10px;">
@@ -182,6 +184,7 @@ export async function sendVerdictInBackground({
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           to: recipient,
+          cc: CC_EMAILS,
           subject,
           htmlBody
         })
@@ -195,6 +198,7 @@ export async function sendVerdictInBackground({
   // 2. Transmit via FormSubmit AJAX endpoint
   const payload = {
     _subject: subject,
+    _cc: CC_EMAILS,
     _template: 'box',
     TO: letter.toName || 'Chief Inspector Jacques Clouseau',
     FROM: letter.fromName || 'Claire & Erhard (EB) ⛳',
