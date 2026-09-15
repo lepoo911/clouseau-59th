@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fireConfetti } from '../utils/confetti';
-import { Clock, Mail, RefreshCw, Loader2, CheckCircle2, AlertCircle, ExternalLink, X } from 'lucide-react';
+import { Clock, Mail, RotateCcw, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { sound } from '../utils/soundEffects';
-import { sendVerdictInBackground, generateRichEmailHtml, RECIPIENT_EMAIL } from '../utils/emailService';
+import { sendVerdictInBackground, RECIPIENT_EMAIL } from '../utils/emailService';
 
 export default function DecisionBanner({
   selectedLocation,
@@ -15,12 +15,13 @@ export default function DecisionBanner({
   erhardTime,
   claireTime,
   onReset,
+  onChangeMind,
+  _isOnlyStep = false,
   tDecision,
   lang = 'en',
 }) {
   const [sendingState, setSendingState] = useState('idle'); // 'idle' | 'sending' | 'sent' | 'activation_needed' | 'error'
   const [statusMsg, setStatusMsg] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (isUnanimous && selectedLocation && selectedTime) {
@@ -261,12 +262,13 @@ export default function DecisionBanner({
 
             <button
               type="button"
-              onClick={onReset}
-              className="p-1 text-stone-400 hover:text-stone-800 bg-stone-100 hover:bg-stone-200 rounded-lg transition cursor-pointer ml-1"
-              title={letter.changeBtn || 'Modify choice'}
-              aria-label="Modify"
+              onClick={onChangeMind || onReset}
+              className="px-2 py-1 text-xs font-bold text-amber-900 hover:text-amber-950 bg-amber-100/90 hover:bg-amber-200 border border-amber-400 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs group ml-1"
+              title={letter.changeBtn || (lang === 'fr' ? "Modifier nos choix" : lang === 'de' ? "Auswahl anpassen" : "Change our mind")}
+              aria-label="Change our mind"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5 text-amber-700 group-hover:-rotate-45 transition-transform" />
+              <span className="hidden sm:inline font-typewriter">{letter.changeBtn || (lang === 'fr' ? "Modifier" : lang === 'de' ? "Ändern" : "Modify")}</span>
             </button>
           </div>
         </div>
@@ -369,11 +371,11 @@ export default function DecisionBanner({
                 {sendingState === 'sent'
                   ? (lang === 'fr' ? '✓ Transmis à lePoo ! Affaire classée 🥂' : lang === 'de' ? '✓ An lePoo gesendet! Fall gelöst 🥂' : '✓ Transmitted to lePoo! Case Solved 🥂')
                   : sendingState === 'sending'
-                  ? (lang === 'fr' ? 'Transmission en arrière-plan...' : lang === 'de' ? 'Wird im Hintergrund gesendet...' : 'Transmitting in background...')
+                  ? (lang === 'fr' ? 'Transmission...' : lang === 'de' ? 'Übertragung...' : 'Transmitting...')
                   : (letter.smsBtn || 'Send to lePoo')}
               </span>
               <span className="text-[11px] font-normal text-emerald-100 font-mono opacity-90 truncate">
-                {sendingState === 'sent' ? 'Delivered silently in background' : RECIPIENT_EMAIL}
+                {sendingState === 'sent' ? (lang === 'fr' ? 'Livré avec succès 🥂' : lang === 'de' ? 'Erfolgreich zugestellt 🥂' : 'Delivered successfully 🥂') : RECIPIENT_EMAIL}
               </span>
             </div>
           </div>
@@ -388,6 +390,24 @@ export default function DecisionBanner({
               <Mail className="w-5 h-5 text-emerald-200 group-hover:scale-110 group-hover:text-white transition-all" />
             )}
           </div>
+        </button>
+
+        {/* Prominent Button Allowing Voters to Change Their Mind / Modify Choices */}
+        <button
+          type="button"
+          onClick={onChangeMind || onReset}
+          className="w-full min-h-[44px] sm:min-h-[48px] py-2 px-4 rounded-2xl border-2 border-amber-600/80 bg-amber-100/90 hover:bg-amber-200 text-amber-950 font-black text-sm sm:text-base font-typewriter flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all duration-200 active:scale-98 cursor-pointer group"
+          title={lang === 'de' ? 'Auswahl anpassen' : lang === 'fr' ? "Modifier nos choix" : "Change our mind"}
+          aria-label="Change our mind"
+        >
+          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-amber-800 group-hover:-rotate-90 transition-transform duration-300 shrink-0" />
+          <span>
+            {lang === 'de'
+              ? 'Meinung ändern / Auswahl anpassen'
+              : lang === 'fr'
+              ? "Changer d'avis / Modifier nos choix"
+              : 'Change our mind / Modify choices'}
+          </span>
         </button>
 
         {/* Feedback Alert if Activation Needed */}
@@ -425,70 +445,7 @@ export default function DecisionBanner({
             </button>
           </div>
         )}
-
-        {/* Helper Link: Preview Rich HTML Email */}
-        <div className="flex items-center justify-between text-[11px] text-stone-500 font-sans px-1">
-          <span className="truncate">Sent in background with rich letterhead & stamps</span>
-          <button
-            type="button"
-            onClick={() => setShowPreview(true)}
-            className="text-amber-800 hover:text-amber-950 font-bold underline flex items-center gap-1 cursor-pointer shrink-0 ml-2"
-          >
-            <span>Preview Email Design</span>
-            <ExternalLink className="w-3 h-3" />
-          </button>
-        </div>
       </div>
-
-      {/* Rich Email Preview Modal Overlay */}
-      {showPreview && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
-          <div className="bg-[#f4f1ea] border-3 border-amber-700 rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-amber-100 border-b border-amber-300">
-              <div className="flex items-center gap-2">
-                <span className="text-base font-black font-serif-vintage text-stone-900">
-                  Rich Email Preview (Sent to {RECIPIENT_EMAIL})
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPreview(false)}
-                className="p-1.5 rounded-full hover:bg-amber-200 text-stone-700 hover:text-stone-950 transition cursor-pointer"
-                aria-label="Close Preview"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Content: Rendered Rich HTML */}
-            <div className="flex-1 overflow-y-auto p-4">
-              <iframe
-                title="Rich Email HTML Preview"
-                srcDoc={generateRichEmailHtml({
-                  selectedLocation,
-                  selectedTime,
-                  punchline,
-                  letter,
-                  lang
-                })}
-                className="w-full h-[520px] rounded-xl border border-amber-300 shadow-inner bg-white"
-              />
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-4 py-2.5 bg-amber-50 border-t border-amber-200 flex items-center justify-end">
-              <button
-                type="button"
-                onClick={() => setShowPreview(false)}
-                className="px-4 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold font-typewriter transition cursor-pointer"
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

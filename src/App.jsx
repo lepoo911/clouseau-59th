@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { RotateCcw } from 'lucide-react';
 import Header from './components/Header';
 import LocationCard from './components/LocationCard';
 import TimeSelector from './components/TimeSelector';
@@ -24,6 +25,7 @@ export default function App() {
   });
 
   const [voting, setVoting] = useState(() => votingManager.getState());
+  const [isModifying, setIsModifying] = useState(false);
 
   useEffect(() => {
     const unsubscribe = votingManager.subscribe((newState) => {
@@ -49,16 +51,24 @@ export default function App() {
   };
 
   const handleSelectLocation = (location) => {
+    setIsModifying(false);
     votingManager.voteLocation(location.id);
   };
 
   const handleSelectTime = (time) => {
+    setIsModifying(false);
     votingManager.voteTime(time);
   };
 
   const handleReset = () => {
     sound.playClick();
+    setIsModifying(false);
     votingManager.resetVotes();
+  };
+
+  const handleChangeMind = () => {
+    sound.playClick();
+    setIsModifying(true);
   };
 
   // Find location details from translations
@@ -145,19 +155,35 @@ export default function App() {
   );
 
   // Step 3 Column Component
-  const renderStep3Decision = () => (
-    <section className="flex flex-col min-h-0 h-full animate-slowReveal">
-      <div className="flex items-center gap-2 mb-1.5 shrink-0">
-        <span className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full text-white font-black text-xs sm:text-sm flex items-center justify-center font-typewriter shadow-xs ${
-          voting.isUnanimous ? 'bg-emerald-600' : 'bg-amber-600'
-        }`}>
-          3
-        </span>
-        <h2 className="text-base sm:text-lg font-black font-serif-vintage text-stone-950 truncate">
-          {voting.isUnanimous
-            ? (lang === 'de' ? '3. Einstimmiges Urteil 🎉 :' : lang === 'fr' ? '3. Verdict unanime 🎉 :' : '3. Unanimous Verdict 🎉 :')
-            : (lang === 'de' ? '3. Abstimmungs-Status :' : lang === 'fr' ? '3. Statut du vote :' : '3. Voting Status :')}
-        </h2>
+  const renderStep3Decision = (isOnlyStep = false) => (
+    <section className={`flex flex-col min-h-0 h-full animate-slowReveal ${
+      isOnlyStep ? 'w-full max-w-xl md:max-w-2xl mx-auto' : ''
+    }`}>
+      <div className="flex items-center justify-between gap-2 mb-1.5 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full text-white font-black text-xs sm:text-sm flex items-center justify-center font-typewriter shadow-xs shrink-0 ${
+            voting.isUnanimous ? 'bg-emerald-600' : 'bg-amber-600'
+          }`}>
+            3
+          </span>
+          <h2 className="text-base sm:text-lg font-black font-serif-vintage text-stone-950 truncate">
+            {voting.isUnanimous
+              ? (lang === 'de' ? '3. Einstimmiges Urteil 🎉 :' : lang === 'fr' ? '3. Verdict unanime 🎉 :' : '3. Unanimous Verdict 🎉 :')
+              : (lang === 'de' ? '3. Abstimmungs-Status :' : lang === 'fr' ? '3. Statut du vote :' : '3. Voting Status :')}
+          </h2>
+        </div>
+
+        {isOnlyStep && (
+          <button
+            type="button"
+            onClick={handleChangeMind}
+            className="flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-500 text-amber-950 text-xs sm:text-sm font-black font-typewriter shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+            title={lang === 'de' ? 'Auswahl ändern' : lang === 'fr' ? "Modifier nos choix" : 'Change our mind'}
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+            <span>{lang === 'de' ? 'Meinung ändern' : lang === 'fr' ? "Changer d'avis" : 'Change our mind'}</span>
+          </button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0">
@@ -172,6 +198,8 @@ export default function App() {
           erhardTime={voting.erhardVote.time}
           claireTime={voting.claireVote.time}
           onReset={handleReset}
+          onChangeMind={handleChangeMind}
+          isOnlyStep={isOnlyStep}
           tDecision={t.decision}
           lang={lang}
         />
@@ -204,24 +232,67 @@ export default function App() {
         )}
 
         {/* State 2: Step 1 + Step 2 revealed side-by-side */}
-        {hasAnyLocation && !hasActiveTimeOrBoth && (
+        {hasAnyLocation && !hasActiveTimeOrBoth && !voting.isUnanimous && (
           <div className="w-full max-w-3xl lg:max-w-4xl h-full grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch animate-slowFadeIn">
             {renderStep1Location()}
             {renderStep2Time()}
           </div>
         )}
 
-        {/* State 3: All 3 Steps revealed */}
-        {hasAnyLocation && hasActiveTimeOrBoth && (
-          <div className="w-full max-w-6xl h-full grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3.5 items-stretch animate-slowFadeIn">
-            <div className="md:col-span-4 lg:col-span-4 min-h-0 h-full">
-              {renderStep1Location()}
-            </div>
-            <div className="md:col-span-3 lg:col-span-3 min-h-0 h-full">
-              {renderStep2Time()}
-            </div>
-            <div className="md:col-span-5 lg:col-span-5 min-h-0 h-full">
-              {renderStep3Decision()}
+        {/* State 4: Unanimous verdict reached - ONLY show Step 3 (The Unanimous Verdict card) in the main part of the screen */}
+        {voting.isUnanimous && !isModifying && (
+          <div className="w-full max-w-xl md:max-w-2xl h-full animate-slowFadeIn flex flex-col justify-center">
+            {renderStep3Decision(true)}
+          </div>
+        )}
+
+        {/* State 3: All 3 Steps revealed (while voting is in progress, or when modifying choices) */}
+        {hasAnyLocation && hasActiveTimeOrBoth && (!voting.isUnanimous || isModifying) && (
+          <div className="w-full max-w-6xl h-full flex flex-col min-h-0 animate-slowFadeIn">
+            {isModifying && (
+              <div className="mb-2 px-3 py-1.5 bg-amber-100/95 border-2 border-amber-500 rounded-xl flex items-center justify-between gap-2 shadow-xs shrink-0">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold font-typewriter text-amber-950 min-w-0 truncate">
+                  <span className="text-base shrink-0">✏️</span>
+                  <span className="truncate">
+                    {lang === 'de'
+                      ? 'Auswahl anpassen: Wählen Sie unten einen neuen Ort oder eine neue Zeit.'
+                      : lang === 'fr'
+                      ? 'Modifier votre choix : Cliquez sur un nouvel endroit ou heure ci-dessous.'
+                      : 'Modifying choices: Select a different location or arrival time below.'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      votingManager.voteTime(null);
+                    }}
+                    className="px-2 py-1 bg-amber-200/90 hover:bg-amber-300 text-amber-950 rounded-lg text-xs font-bold font-typewriter shadow-2xs transition active:scale-95 cursor-pointer"
+                    title="Unset my time vote"
+                  >
+                    {lang === 'de' ? 'Zeit löschen' : lang === 'fr' ? "Effacer l'heure" : 'Clear time'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsModifying(false)}
+                    className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold font-typewriter shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    {lang === 'de' ? '✓ Fertig / Urteil' : lang === 'fr' ? '✓ Voir le verdict' : '✓ Done / View Verdict'}
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3.5 items-stretch">
+              <div className="md:col-span-4 lg:col-span-4 min-h-0 h-full">
+                {renderStep1Location()}
+              </div>
+              <div className="md:col-span-3 lg:col-span-3 min-h-0 h-full">
+                {renderStep2Time()}
+              </div>
+              <div className="md:col-span-5 lg:col-span-5 min-h-0 h-full">
+                {renderStep3Decision(false)}
+              </div>
             </div>
           </div>
         )}
