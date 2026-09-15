@@ -6,7 +6,7 @@
 const GITHUB_PAGES_BASE = 'https://lepoo911.github.io/clouseau-59th';
 export const RECIPIENT_EMAIL = 'tubywuby@gmail.com';
 export const CC_EMAILS = 'clairedec42@yahoo.com, erhardbuchholz@gmail.com';
-export const GOOGLE_SCRIPT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxnxYfa2uAtg9nK-3C4BA-TCb36H5qqLR6xkba_uUN24pbN1R9eNTvW4zkjJj7ECfRb_A/exec';
+export const GOOGLE_SCRIPT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzCXlCltSO1j4HqnaAOns0n6xlvvZAbFQurR773WX2cVKc_2d_EBxN2DDASSA3EulSzqQ/exec';
 
 /**
  * Generates an email-safe, responsive HTML letter mimicking the in-app memo card.
