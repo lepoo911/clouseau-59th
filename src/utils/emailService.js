@@ -5,6 +5,7 @@
 
 const GITHUB_PAGES_BASE = 'https://lepoo911.github.io/clouseau-59th';
 export const RECIPIENT_EMAIL = 'tubywuby@gmail.com';
+export const GOOGLE_SCRIPT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxnxYfa2uAtg9nK-3C4BA-TCb36H5qqLR6xkba_uUN24pbN1R9eNTvW4zkjJj7ECfRb_A/exec';
 
 /**
  * Generates an email-safe, responsive HTML letter mimicking the in-app memo card.
@@ -170,15 +171,14 @@ export async function sendVerdictInBackground({
     lang
   });
 
-  // 1. Check for custom Google Apps Script Webhook URL (stored in localStorage or global)
-  const webhookUrl = typeof window !== 'undefined'
-    ? (localStorage.getItem('lepoo_webhook_url') || window.LEPOO_WEBHOOK_URL)
-    : null;
+  // 1. Primary: Transmit rich HTML email via Google Apps Script Webhook
+  const webhookUrl = (typeof window !== 'undefined' && localStorage.getItem('lepoo_webhook_url')) || GOOGLE_SCRIPT_WEBHOOK_URL;
 
   if (webhookUrl) {
     try {
-      const resp = await fetch(webhookUrl, {
+      await fetch(webhookUrl, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           to: recipient,
@@ -186,11 +186,9 @@ export async function sendVerdictInBackground({
           htmlBody
         })
       });
-      if (resp.ok) {
-        return { success: true, method: 'webhook' };
-      }
+      return { success: true, method: 'google_script' };
     } catch (e) {
-      console.warn('Webhook transmission failed, trying FormSubmit fallback:', e);
+      console.warn('Google Apps Script webhook transmission failed, trying FormSubmit fallback:', e);
     }
   }
 
