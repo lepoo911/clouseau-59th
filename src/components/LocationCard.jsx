@@ -45,7 +45,7 @@ export default function LocationCard({
 
   // Card border styling based on two-user votes & active user hover color
   const cardBorderClass = isUnanimous
-    ? 'bg-gradient-to-br from-blue-50/60 via-amber-50/40 to-rose-50/60 border-amber-500 ring-3 ring-amber-400/60 shadow-lg scale-[1.01]'
+    ? 'bg-gradient-to-br from-emerald-50/80 via-green-50/40 to-emerald-50/80 border-emerald-500 ring-4 ring-emerald-400/50 shadow-xl shadow-emerald-500/25 scale-[1.01]'
     : erhardVoted
     ? currentUser === 'erhard'
       ? 'bg-blue-50/50 border-blue-500 ring-3 ring-blue-400/40 shadow-md scale-[1.005] hover:ring-4 hover:ring-blue-300'
@@ -86,7 +86,7 @@ export default function LocationCard({
             {/* Voting Badges in Top Right */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10">
               {isUnanimous ? (
-                <div className="bg-gradient-to-r from-blue-600 via-amber-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-white/80 animate-pulse">
+                <div className="bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 text-white px-2.5 py-1 rounded-full shadow-lg border border-emerald-300/90 animate-glowing-green flex items-center gap-1.5">
                   <span className="text-[11px] font-black font-typewriter tracking-tight">
                     {lang === 'de' ? '🤝 Beide einig!' : lang === 'fr' ? '🤝 Accord unanime !' : '🤝 Unanimous!'}
                   </span>
@@ -161,7 +161,7 @@ export default function LocationCard({
             : 'min-h-[36px] sm:min-h-[38px] py-1.5 px-2 text-xs sm:text-sm mb-1.5'
         } ${
           isUnanimous
-            ? 'bg-gradient-to-r from-blue-600 via-amber-600 to-rose-600 text-white ring-2 ring-amber-300 hover:brightness-110 hover:shadow-lg'
+            ? 'bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 text-white ring-3 ring-emerald-300 animate-glowing-green hover:brightness-110 hover:scale-[1.01]'
             : isSelectedByCurrent
             ? currentUser === 'erhard'
               ? 'bg-blue-600 text-white ring-2 ring-blue-300 hover:bg-blue-500 hover:ring-4 hover:ring-blue-200'

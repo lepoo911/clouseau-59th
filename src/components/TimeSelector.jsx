@@ -64,7 +64,7 @@ export default function TimeSelector({
             : 'bg-stone-50 hover:bg-rose-50 hover:border-rose-500 hover:text-rose-950 hover:ring-2 hover:ring-rose-400/40 border border-stone-200 text-stone-800';
 
           if (slotUnanimous) {
-            btnClass = 'bg-gradient-to-r from-blue-600 via-amber-500 to-rose-600 text-white shadow-md ring-3 ring-amber-300 scale-[1.02] border-amber-400 hover:brightness-110';
+            btnClass = 'bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 text-white shadow-lg ring-3 ring-emerald-300 scale-[1.02] border border-emerald-400 hover:brightness-110 animate-glowing-green';
           } else if (currentSelected) {
             btnClass = currentUser === 'erhard'
               ? 'bg-blue-600 text-white shadow-sm ring-3 ring-blue-300 scale-[1.01] hover:bg-blue-500 hover:ring-4 hover:ring-blue-200'
